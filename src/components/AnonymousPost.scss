@@ -1,0 +1,42 @@
+.anonymous-post {
+  background-color: #f0e0d6;
+  border-left: none;
+  border-top: none;
+  border: 1px solid #d9bfb7;
+  color: #800000;
+  display: inline-block;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 4px 0;
+  min-height: 128px;
+  min-width: 300px;
+  padding: 2px;
+  font-size: 10pt;
+
+  img {
+    float: left;
+    margin: 3px 20px 5px;
+    max-height: 64px;
+  }
+
+  pre {
+    margin: 2px 0;
+    font-family: unset;
+    font-size: unset;
+    color: #789922;
+  }
+
+  span {
+    margin: 2px 0;
+  }
+
+  .author {
+    color: #117743;
+    font-weight: bold;
+  }
+
+  .link {
+    color: #0000ee;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
