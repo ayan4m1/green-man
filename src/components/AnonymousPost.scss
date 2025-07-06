@@ -32,11 +32,21 @@
   .author {
     color: #117743;
     font-weight: bold;
+    margin-left: 2px;
   }
 
   .link {
     color: #0000ee;
     text-decoration: underline;
     cursor: pointer;
+  }
+
+  .checkbox {
+    float: left;
+    height: 16px;
+    width: 16px;
+    border: 1px solid #ccc;
+    background-color: white;
+    margin: 2px;
   }
 }

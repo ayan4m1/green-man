@@ -23,7 +23,7 @@ const router = createHashRouter([
 ]);
 
 root.render(
-    <Suspense fallback={<SuspenseFallback />}>
-      <RouterProvider router={router} />
-    </Suspense>
+  <Suspense fallback={<SuspenseFallback />}>
+    <RouterProvider router={router} />
+  </Suspense>
 );
