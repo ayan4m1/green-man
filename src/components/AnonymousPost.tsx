@@ -6,13 +6,15 @@ const generatePostNumber = () => 1e6 + Math.floor(Math.random() * 2e6);
 const getPostTimestamp = () => format(Date.now(), 'MM/dd/yy (EEE) HH:mm:ss');
 
 interface AnonymousPostProps {
-  text: string;
+  dimensions: string;
   filename: string;
-  imgSrc: string;
+  image?: string;
+  size: string;
+  text: string;
 }
 
 const AnonymousPost = (
-  { filename, text, imgSrc }: AnonymousPostProps,
+  { dimensions, filename, image, size, text }: AnonymousPostProps,
   ref: Ref<HTMLDivElement>
 ) => {
   const postNumber = useMemo(() => generatePostNumber(), []);
@@ -28,13 +30,15 @@ const AnonymousPost = (
       </div>
       <div className="row">
         <div className="col">
-          File: <span className="link">{filename}</span> (120 KB, 512x512)
+          File: <span className="link">{filename}</span> ({size}, {dimensions})
         </div>
       </div>
       <div className="d-flex">
-        <div className="flex-shrink-1">
-          <img src={imgSrc} />
-        </div>
+        {Boolean(image) && (
+          <div className="flex-shrink-1">
+            <img src={image} />
+          </div>
+        )}
         <div className="w-100">
           {text
             .split('\n')

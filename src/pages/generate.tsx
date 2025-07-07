@@ -1,11 +1,25 @@
 import { Button, Card, Form } from 'react-bootstrap';
-import { Fragment, KeyboardEvent, useCallback, useRef } from 'react';
+import {
+  ChangeEvent,
+  Fragment,
+  KeyboardEvent,
+  useCallback,
+  useRef,
+  useState
+} from 'react';
 
 import AnonymousPost from '../components/AnonymousPost';
 import { useFormik } from 'formik';
 import { toPng } from 'html-to-image';
+import { filesize } from 'filesize';
 
 export function Component() {
+  const [imageSize, setImageSize] = useState<string>(
+    filesize(128000, { standard: 'jedec' })
+  );
+  const [dims, setDims] = useState<string>('512x512');
+  const [filename, setFilename] = useState<string>('empty.jpg');
+  const [image, setImage] = useState<string>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
   const postRef = useRef<HTMLDivElement>(null);
   const { handleChange, handleSubmit, values, setFieldValue } = useFormik({
@@ -59,6 +73,35 @@ screenshot it`
     },
     [setFieldValue]
   );
+  const handleFileChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const { files } = event.target;
+      const [file] = files;
+
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      const image = new Image();
+
+      reader.addEventListener('load', () => {
+        const dataUrl = reader.result as string;
+
+        setImageSize(filesize(file.size, { standard: 'jedec' }));
+        setFilename(file.name);
+        setImage(dataUrl);
+        image.src = dataUrl;
+      });
+      image.addEventListener('load', () =>
+        setDims(`${image.width}x${image.height}`)
+      );
+
+      reader.readAsDataURL(file);
+    },
+    []
+  );
+
   return (
     <Fragment>
       <title>Generate 4Chan Reply</title>
@@ -70,26 +113,26 @@ screenshot it`
           <Form.Group>
             <Form.Label>Image</Form.Label>
             <Form.Control
-              type="file"
               name="image"
+              onChange={handleFileChange}
+              type="file"
               value={values.image}
-              onChange={handleChange}
             />
           </Form.Group>
           <Form.Group>
             <Form.Label>Text</Form.Label>
             <Form.Control
-              ref={textRef}
               as="textarea"
               name="text"
-              rows={6}
-              value={values.text}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
+              ref={textRef}
+              rows={6}
+              value={values.text}
             />
           </Form.Group>
           <Form.Group>
-            <Button variant="success" onClick={handleDownloadClick}>
+            <Button onClick={handleDownloadClick} variant="success">
               Download PNG
             </Button>
           </Form.Group>
@@ -97,9 +140,11 @@ screenshot it`
       </Card>
       <Card body>
         <AnonymousPost
-          filename="test.jpg"
-          imgSrc="https://i.imgur.com/x9Nsgo0.png"
+          dimensions={dims}
+          filename={filename}
+          image={image}
           ref={postRef}
+          size={imageSize}
           text={values.text}
         />
       </Card>
