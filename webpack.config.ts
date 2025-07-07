@@ -1,5 +1,5 @@
+import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import { type Configuration, type WebpackPluginInstance } from 'webpack';
 import autoprefixer from 'autoprefixer';
 import HtmlPlugin from 'html-webpack-plugin';
 import ESLintPlugin from 'eslint-webpack-plugin';
@@ -9,10 +9,10 @@ import StylelintPlugin from 'stylelint-webpack-plugin';
 import postcssFlexbugsFixes from 'postcss-flexbugs-fixes';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
+import { type Configuration, type WebpackPluginInstance } from 'webpack';
 import { CleanWebpackPlugin as CleanPlugin } from 'clean-webpack-plugin';
 
 import 'webpack-dev-server';
-import { fileURLToPath } from 'url';
 
 const dev = process.env.NODE_ENV === 'development';
 
@@ -110,25 +110,11 @@ const config: Configuration = {
   },
   plugins,
   resolve: {
-    extensions: ['.js', '.ts', '.tsx', '.json', '.csv'],
+    extensions: ['.js', '.ts', '.tsx', '.json'],
     modules: ['node_modules', 'src']
   },
   optimization: {
-    minimizer: [new TerserPlugin(), new CssMinimizerPlugin()],
-    splitChunks: {
-      cacheGroups: {
-        commons: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendor',
-          chunks: 'all'
-        },
-        data: {
-          test: /[\\/]data[\\/].*csv$/,
-          name: 'data',
-          chunks: 'all'
-        }
-      }
-    }
+    minimizer: [new TerserPlugin(), new CssMinimizerPlugin()]
   },
   ignoreWarnings: [/import rules are/]
 };

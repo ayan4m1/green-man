@@ -3,9 +3,10 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "module": "nodenext",
+    "moduleResolution": "nodenext",
     "jsx": "react-jsx",
     "outDir": "./dist",
-    "target": "esnext"
+    "target": "es6"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
