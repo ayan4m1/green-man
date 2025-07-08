@@ -1,4 +1,4 @@
-import { Button, Card, Form } from 'react-bootstrap';
+import { Button, Card, Form, InputGroup } from 'react-bootstrap';
 import {
   ChangeEvent,
   Fragment,
@@ -12,17 +12,25 @@ import AnonymousPost from '../components/AnonymousPost';
 import { useFormik } from 'formik';
 import { toPng } from 'html-to-image';
 import { filesize } from 'filesize';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload, faRecycle } from '@fortawesome/free-solid-svg-icons';
 
 export function Component() {
-  const [imageSize, setImageSize] = useState<string>(
-    filesize(128000, { standard: 'jedec' })
-  );
-  const [dims, setDims] = useState<string>('512x512');
-  const [filename, setFilename] = useState<string>('empty.jpg');
-  const [image, setImage] = useState<string>(null);
-  const textRef = useRef<HTMLTextAreaElement>(null);
   const postRef = useRef<HTMLDivElement>(null);
-  const { handleChange, handleSubmit, values, setFieldValue } = useFormik({
+  const fileRef = useRef<HTMLInputElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+  const [imageSize, setImageSize] = useState<string>(null);
+  const [dims, setDims] = useState<string>(null);
+  const [filename, setFilename] = useState<string>(null);
+  const [image, setImage] = useState<string>(null);
+  const {
+    handleChange,
+    handleSubmit,
+    errors,
+    values,
+    setFieldValue,
+    setFieldError
+  } = useFormik({
     initialValues: {
       image: null,
       text: `> be anon
@@ -32,6 +40,16 @@ screenshot it`
     },
     onSubmit: () => {}
   });
+  const handleClearClick = useCallback(() => {
+    setDims(null);
+    setImage(null);
+    setFilename(null);
+    setImageSize(null);
+
+    if (fileRef.current) {
+      fileRef.current.value = '';
+    }
+  }, []);
   const handleDownloadClick = useCallback(async () => {
     if (!postRef.current) {
       return;
@@ -93,34 +111,52 @@ screenshot it`
         setImage(dataUrl);
         image.src = dataUrl;
       });
-      image.addEventListener('load', () =>
-        setDims(`${image.width}x${image.height}`)
-      );
+      image.addEventListener('load', () => {
+        setDims(`${image.width}x${image.height}`);
+        setFieldError('image', undefined);
+      });
+      image.addEventListener('error', () => {
+        handleClearClick();
+        setFieldError('image', 'Invalid file selected, must be an image!');
+      });
 
       reader.readAsDataURL(file);
     },
-    []
+    [handleClearClick, setFieldError]
   );
 
   return (
     <Fragment>
-      <title>Generate 4Chan Reply</title>
+      <title>Generate a 4Chan Comment</title>
       <Card body>
         <Card.Title className="mb-4 text-light">
-          Generate 4Chan Reply
+          Generate 4Chan Comment
         </Card.Title>
         <Form onSubmit={handleSubmit}>
           <Form.Group>
-            <Form.Label>Image</Form.Label>
-            <Form.Control
-              name="image"
-              onChange={handleFileChange}
-              type="file"
-              value={values.image}
-            />
+            <Form.Label>Pick an image</Form.Label>
+            <InputGroup>
+              <Form.Control
+                isInvalid={Boolean(errors.image)}
+                name="image"
+                onChange={handleFileChange}
+                ref={fileRef}
+                type="file"
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.image as string}
+              </Form.Control.Feedback>
+              {!errors.image && (
+                <InputGroup.Text className="p-0">
+                  <Button onClick={handleClearClick} variant="danger">
+                    <FontAwesomeIcon fixedWidth icon={faRecycle} /> Clear
+                  </Button>
+                </InputGroup.Text>
+              )}
+            </InputGroup>
           </Form.Group>
           <Form.Group>
-            <Form.Label>Text</Form.Label>
+            <Form.Label>Enter text</Form.Label>
             <Form.Control
               as="textarea"
               name="text"
@@ -132,21 +168,28 @@ screenshot it`
             />
           </Form.Group>
           <Form.Group>
-            <Button onClick={handleDownloadClick} variant="success">
-              Download PNG
+            <Button
+              className="mt-2"
+              onClick={handleDownloadClick}
+              variant="success"
+            >
+              <FontAwesomeIcon fixedWidth icon={faDownload} /> Download PNG
             </Button>
           </Form.Group>
         </Form>
       </Card>
       <Card body>
-        <AnonymousPost
-          dimensions={dims}
-          filename={filename}
-          image={image}
-          ref={postRef}
-          size={imageSize}
-          text={values.text}
-        />
+        <Card.Title className="mb-4 text-light">Your Comment</Card.Title>
+        <div className="ms-4">
+          <AnonymousPost
+            dimensions={dims}
+            filename={filename}
+            image={image}
+            ref={postRef}
+            size={imageSize}
+            text={values.text}
+          />
+        </div>
       </Card>
     </Fragment>
   );

@@ -1,15 +1,15 @@
 import { format } from 'date-fns';
 import { forwardRef, Ref, useMemo } from 'react';
 
-const generatePostNumber = () => 1e6 + Math.floor(Math.random() * 2e6);
+const generatePostNumber = () => 2e6 + Math.floor(Math.random() * 1.5e6);
 
 const getPostTimestamp = () => format(Date.now(), 'MM/dd/yy (EEE) HH:mm:ss');
 
 interface AnonymousPostProps {
-  dimensions: string;
-  filename: string;
+  dimensions?: string;
+  filename?: string;
   image?: string;
-  size: string;
+  size?: string;
   text: string;
 }
 
@@ -28,11 +28,14 @@ const AnonymousPost = (
           {timestamp} No.{postNumber}
         </div>
       </div>
-      <div className="row">
-        <div className="col">
-          File: <span className="link">{filename}</span> ({size}, {dimensions})
+      {Boolean(filename) && (
+        <div className="row">
+          <div className="col">
+            File: <span className="link">{filename}</span> ({size}, {dimensions}
+            )
+          </div>
         </div>
-      </div>
+      )}
       <div className="d-flex">
         {Boolean(image) && (
           <div className="flex-shrink-1">
