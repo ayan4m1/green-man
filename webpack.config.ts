@@ -93,13 +93,8 @@ const config: Configuration = {
         ]
       },
       {
-        test: /\.csv$/,
-        loader: 'csv-loader',
-        options: {
-          dynamicTyping: true,
-          header: true,
-          skipEmptyLines: true
-        }
+        test: /\.png$/,
+        type: 'asset/inline'
       }
     ]
   },

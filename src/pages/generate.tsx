@@ -4,6 +4,7 @@ import {
   Fragment,
   KeyboardEvent,
   useCallback,
+  useEffect,
   useRef,
   useState
 } from 'react';
@@ -13,7 +14,16 @@ import { useFormik } from 'formik';
 import { toPng } from 'html-to-image';
 import { filesize } from 'filesize';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faRecycle } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowLeftRotate,
+  faDownload
+} from '@fortawesome/free-solid-svg-icons';
+
+import pepe from '../images/pepe.png';
+import pedobear from '../images/pedobear.png';
+import trollface from '../images/trollface.png';
+import galaxyBrain from '../images/galaxy-brain.png';
+import ImageGallery from '../components/ImageGallery';
 
 export function Component() {
   const postRef = useRef<HTMLDivElement>(null);
@@ -40,15 +50,23 @@ screenshot it`
     },
     onSubmit: () => {}
   });
-  const handleClearClick = useCallback(() => {
-    setDims(null);
-    setImage(null);
-    setFilename(null);
-    setImageSize(null);
+  const handleResetClick = useCallback((image: string, filename: string) => {
+    const changeEvent = new Event('change');
+    const data = atob(image.split(',')[1]);
+    const array = new Uint8Array(data.length);
+    let i = data.length;
 
-    if (fileRef.current) {
-      fileRef.current.value = '';
+    while (i--) {
+      array[i] = data.charCodeAt(i);
     }
+
+    const file = new File([array], filename);
+    const dataTransfer = new DataTransfer();
+
+    dataTransfer.items.add(file);
+
+    fileRef.current.files = dataTransfer.files;
+    fileRef.current.dispatchEvent(changeEvent);
   }, []);
   const handleDownloadClick = useCallback(async () => {
     if (!postRef.current) {
@@ -76,8 +94,8 @@ screenshot it`
           return;
         }
 
-        // const cursorPos = textRef.current.selectionStart;
         // todo: figure out if the line we are on starts with a >
+        // const cursorPos = textRef.current.selectionStart;
         // !lines[lines.length - 1].startsWith('>')
 
         setFieldValue(
@@ -116,25 +134,35 @@ screenshot it`
         setFieldError('image', undefined);
       });
       image.addEventListener('error', () => {
-        handleClearClick();
+        handleResetClick(trollface, 'trollface.png');
         setFieldError('image', 'Invalid file selected, must be an image!');
       });
 
       reader.readAsDataURL(file);
     },
-    [handleClearClick, setFieldError]
+    [handleResetClick, setFieldError]
   );
+
+  // needed to bypass React SyntheticEvent for onChange
+  useEffect(() => {
+    fileRef.current.onchange = (e) =>
+      handleFileChange(e as unknown as ChangeEvent<HTMLInputElement>);
+  }, [handleFileChange]);
+
+  useEffect(() => {
+    handleResetClick(trollface, 'trollface.png');
+  }, []);
 
   return (
     <Fragment>
-      <title>Generate a 4Chan Comment</title>
+      <title>Generate 4Chan Comment</title>
       <Card body>
         <Card.Title className="mb-4 text-light">
-          Generate 4Chan Comment
+          Generate a 4Chan Comment
         </Card.Title>
         <Form onSubmit={handleSubmit}>
           <Form.Group>
-            <Form.Label>Pick an image</Form.Label>
+            <Form.Label>Choose a local image or use a preset</Form.Label>
             <InputGroup>
               <Form.Control
                 isInvalid={Boolean(errors.image)}
@@ -148,12 +176,39 @@ screenshot it`
               </Form.Control.Feedback>
               {!errors.image && (
                 <InputGroup.Text className="p-0">
-                  <Button onClick={handleClearClick} variant="danger">
-                    <FontAwesomeIcon fixedWidth icon={faRecycle} /> Clear
+                  <Button
+                    onClick={() => handleResetClick(trollface, 'trollface.png')}
+                    variant="danger"
+                  >
+                    <FontAwesomeIcon fixedWidth icon={faArrowLeftRotate} />{' '}
+                    Reset
                   </Button>
                 </InputGroup.Text>
               )}
             </InputGroup>
+          </Form.Group>
+          <Form.Group>
+            <ImageGallery
+              images={[
+                {
+                  data: trollface,
+                  filename: 'trollface.png'
+                },
+                {
+                  data: pepe,
+                  filename: 'pepe.png'
+                },
+                {
+                  data: pedobear,
+                  filename: 'pedobear.png'
+                },
+                {
+                  data: galaxyBrain,
+                  filename: 'galaxy-brain.png'
+                }
+              ]}
+              onImageSelect={handleResetClick}
+            />
           </Form.Group>
           <Form.Group>
             <Form.Label>Enter text</Form.Label>
